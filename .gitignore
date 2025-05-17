@@ -23,7 +23,6 @@ resolved-configs/
 input_ocibuild/
 output_ocibuild_docker_build/
 
-infrastructure/
 infrastructure/tfplan
 infrastructure/terraform.tfstate
 infrastructure/terraform.tfstate.backup

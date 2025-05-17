@@ -5,8 +5,6 @@ from app.v1.routers import tickets
 from app.daoLayer.dataModel import ticketDO
 from fastapi.middleware.cors import CORSMiddleware
 
-
-
 ticketDO.Base.metadata.create_all(bind=engine)
 
 app = FastAPI()

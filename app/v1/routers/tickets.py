@@ -44,5 +44,5 @@ def update(ticket_id: str, data: TicketUpdate):
 def delete(ticket_id: str):
     result = crud.delete_ticket(ticket_id)
     if not result:
-        raise HTTPException(status_code=404, detail="Ticket not found")
+        raise HTTPException(result)
     return {"message": "Ticket deleted"}

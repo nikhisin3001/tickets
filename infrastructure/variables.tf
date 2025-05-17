@@ -6,15 +6,17 @@ variable "aws_region" {
 variable "db_username" {
   description = "Database master username."
   type        = string
+  default     = "ticket"
 }
 
 variable "db_password" {
   description = "Database master password."
   type        = string
   sensitive   = true
+  default     = "nikhilticket"
 }
 
 variable "db_name" {
   description = "Database name."
-  default     = "fastapi_db"
+  default     = "ticket-service"
 }

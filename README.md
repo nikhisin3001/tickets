@@ -288,6 +288,24 @@ This sequence will provision/update AWS resources, build and push your Docker im
 
 ---
 
+## Secrets Management
+
+This project uses AWS Secrets Manager to securely store sensitive values (such as the database password) and inject them into the ECS task at runtime.
+
+### How it works
+- The database password is stored in AWS Secrets Manager as `fastapi/production/db_password`.
+- The ECS task definition references this secret using the `secrets` block, so the value is available as the `DB_PASSWORD` environment variable inside the container.
+- The ECS task execution role is granted permission to retrieve the secret value from Secrets Manager.
+
+### How to set/update the secret
+1. Set the secret value in your Terraform variable file or via CLI (e.g., `terraform apply -var="db_password=YOUR_PASSWORD"`).
+2. To update the secret in AWS Secrets Manager, update the value of `db_password` and re-apply Terraform.
+
+### Reference in your application
+- In your FastAPI app, read the database password from the `DB_PASSWORD` environment variable.
+
+---
+
 ## FAQ
 
 **Q: Will Terraform automatically store state files when I run `terraform apply` for the first time? Where are they stored?**

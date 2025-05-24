@@ -29,6 +29,12 @@ resource "aws_ecs_task_definition" "fastapi" {
           awslogs-stream-prefix = "ecs"
         }
       }
+      secrets = [
+        {
+          name      = "DB_PASSWORD"
+          valueFrom = aws_secretsmanager_secret.fastapi_db_password.arn
+        }
+      ]
     }
   ])
 }

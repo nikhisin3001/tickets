@@ -29,7 +29,39 @@ fastApiProject/
 
 ---
 
-## Setup Instructions
+## API Endpoints
+- **/auth/**: User registration and login
+- **/tickets/**: CRUD operations for tickets (protected endpoints)
+- **/docs**: Interactive API documentation
+
+---
+
+## Database Schema Diagram
+
+```mermaid
+erDiagram
+    users ||--o{ tickets : creates
+    users {
+        id UUID PK
+        username VARCHAR
+        email VARCHAR
+        hashed_password VARCHAR
+    }
+    tickets {
+        id UUID PK
+        title VARCHAR
+        description TEXT
+        created_by VARCHAR
+        created_at TIMESTAMP
+        severity VARCHAR
+        status VARCHAR
+        comments TEXT
+    }
+```
+
+---
+
+## Local Development & Testing
 
 ### 1. Clone the Repository
 ```bash
@@ -63,7 +95,7 @@ pip install -r requirements.txt
   createdb fastapi_db
   ```
 
-### 5. Run the Application
+### 5. Run the Application Locally
 ```bash
 uvicorn main:app --reload
 ```
@@ -72,39 +104,8 @@ uvicorn main:app --reload
 
 ---
 
-## API Endpoints
-- **/auth/**: User registration and login
-- **/tickets/**: CRUD operations for tickets (protected endpoints)
-
----
-
 ## How to run the service
 - http://127.0.0.1:8000/tickets
-
----
-
-## Database Schema Diagram
-
-```mermaid
-erDiagram
-    users ||--o{ tickets : creates
-    users {
-        id UUID PK
-        username VARCHAR
-        email VARCHAR
-        hashed_password VARCHAR
-    }
-    tickets {
-        id UUID PK
-        title VARCHAR
-        description TEXT
-        created_by VARCHAR
-        created_at TIMESTAMP
-        severity VARCHAR
-        status VARCHAR
-        comments TEXT
-    }
-```
 
 ---
 
@@ -128,27 +129,23 @@ DATABASE_URL = "postgresql://<user>:<password>@<host>:<port>/<dbname>"
    ```
 4. The app will use this connection string to create tables and perform all database operations.
 
-**Tip:**
-- You can use a tool like `psql`, DBeaver, or pgAdmin to connect to your database and verify connectivity.
-- For `psql` (Homebrew on macOS):
+# Infrastructure & Deployment (AWS)
+
+## Prerequisites
+- Install Terraform separately on your system. For macOS, use:
   ```bash
-  /opt/homebrew/opt/postgresql@14/bin/psql -h <host> -U <user> -d <dbname>
-  # Example for AWS RDS:
-  /opt/homebrew/opt/postgresql@14/bin/psql -h database-1.cqdw0cis8jds.us-east-1.rds.amazonaws.com -U postgres -d postgres
+  brew tap hashicorp/tap
+  brew install hashicorp/tap/terraform
   ```
-  Replace `<host>`, `<user>`, and `<dbname>` with your actual database host, username, and database name.
-
----
-
-## Notes
-- For schema changes, use a migration tool like Alembic.
-- The app will auto-create tables on first run if they do not exist.
-- For production, remove `--reload` and configure environment variables securely.
-
----
-
-## License
-MIT
+- Verify installation:
+  ```bash
+  terraform version
+  ```
+- Install and configure AWS CLI:
+  ```bash
+  brew install awscli
+  aws configure
+  ```
 
 ---
 
@@ -166,49 +163,30 @@ This project provides Terraform scripts to provision AWS resources for running t
 
 ### Setup Steps
 
-1. **Configure AWS Credentials**
-   - Make sure you have AWS CLI installed and configured with credentials that have permissions to create the above resources.
-   - Example:
-     ```bash
-     aws configure
-     ```
-
-2. **Set Database Credentials**
+1. **Set Database Credentials**
    - Edit `infrastructure/variables.tf` or use a `terraform.tfvars` file to provide `db_username` and `db_password`.
 
-3. **Initialize Terraform**
+2. **Initialize Terraform**
    ```bash
    bash build/terraform-init.sh
    ```
 
-4. **Plan Infrastructure Changes**
+3. **Plan Infrastructure Changes**
    ```bash
    bash build/terraform-plan.sh
    ```
 
-5. **Apply Infrastructure Changes**
+4. **Apply Infrastructure Changes**
    ```bash
    bash build/terraform-apply.sh
    ```
 
-6. **Build and Push Docker Image to ECR**
-   - Get the ECR repository URL from Terraform outputs or AWS Console.
-   - Build and push:
-     ```bash
-     bash build/build.sh <ecr-repo-url>
-     ```
-
-7. **Deploy to ECS**
+5. **(Optional) Set Dummy AWS Credentials for Testing**
+   If you want to test Terraform commands without real AWS credentials, you can set dummy credentials:
    ```bash
-   bash build/deploy.sh
+   source build/set-dummy-aws-creds.sh
    ```
-
-### 0. (Optional) Set Dummy AWS Credentials for Testing
-If you want to test Terraform commands without real AWS credentials, you can set dummy credentials:
-```bash
-source build/set-dummy-aws-creds.sh
-```
-This allows you to run `terraform plan` for validation, but you cannot apply changes to AWS.
+   This allows you to run `terraform plan` for validation, but you cannot apply changes to AWS.
 
 ---
 
@@ -247,21 +225,45 @@ This project uses a remote backend for Terraform state management, enabling safe
 
 ---
 
-## Prerequisites
+## Docker Build and Push (ECR)
 
-- Install Terraform separately on your system. For macOS, use:
-  ```bash
-  brew tap hashicorp/tap
-  brew install hashicorp/tap/terraform
-  ```
-- Verify installation:
-  ```bash
-  terraform version
-  ```
+Before deploying to AWS ECS, you must build your Docker image and push it to the AWS ECR repository provisioned by Terraform.
+
+### Steps:
+1. **Authenticate Docker to ECR**
+2. **Build the Docker image**
+3. **Tag the image for ECR**
+4. **Push the image to ECR**
+
+You can use the provided script:
+
+```bash
+bash build/build.sh
+```
+
+This script will:
+- Authenticate Docker to your ECR registry
+- Build the Docker image using the `Dockerfile` in the project root
+- Tag the image as `latest` for your ECR repo
+- Push the image to ECR
+
+**Note:** The ECR URL is hardcoded in `build/build.sh`. If your ECR repo URL is different, update the script accordingly.
 
 ---
 
-### FAQ
+## Deploying the Latest Image to ECS
+
+After pushing your Docker image to ECR, you must update your ECS service to use the new image. Use the provided script:
+
+```bash
+bash build/deploy.sh
+```
+
+This script will force a new deployment of your ECS service, ensuring the latest image is pulled and new tasks are started.
+
+---
+
+## FAQ
 
 **Q: Will Terraform automatically store state files when I run `terraform apply` for the first time? Where are they stored?**
 - By default, Terraform stores state files locally in the `infrastructure/` directory as `terraform.tfstate`.
@@ -277,3 +279,6 @@ This project uses a remote backend for Terraform state management, enabling safe
 - Use environment variables for configuration.
 
 ---
+
+## License
+MIT

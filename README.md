@@ -263,6 +263,31 @@ This script will force a new deployment of your ECS service, ensuring the latest
 
 ---
 
+## Deployment Steps (Summary)
+
+To deploy the FastAPI service to AWS, follow these steps in order:
+
+1. **Plan Infrastructure Changes**
+   ```bash
+   bash build/terraform-plan.sh
+   ```
+2. **Apply Infrastructure Changes**
+   ```bash
+   bash build/terraform-apply.sh
+   ```
+3. **Build and Push Docker Image to ECR**
+   ```bash
+   bash build/build.sh
+   ```
+4. **Deploy the Latest Image to ECS**
+   ```bash
+   bash build/deploy.sh
+   ```
+
+This sequence will provision/update AWS resources, build and push your Docker image, and update the ECS service to use the latest image.
+
+---
+
 ## FAQ
 
 **Q: Will Terraform automatically store state files when I run `terraform apply` for the first time? Where are they stored?**

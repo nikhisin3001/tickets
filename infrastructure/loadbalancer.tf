@@ -8,7 +8,7 @@ resource "aws_lb" "app_lb" {
 }
 
 resource "aws_lb_target_group" "ui_tg" {
-  name     = "ticket-service-tg"
+  name     = "ticket-service-tg-8000"
   port     = 8000
   protocol = "HTTP"
   vpc_id   = aws_vpc.main.id

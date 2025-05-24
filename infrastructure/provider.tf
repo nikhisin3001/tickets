@@ -4,10 +4,10 @@ provider "aws" {
 
 terraform {
   backend "s3" {
-    bucket         = "<your-terraform-state-bucket>"   # TODO: Replace with your S3 bucket name
+    bucket         = "terraform-bucket-state-tickets"
     key            = "terraform.tfstate"
-    region         = "<your-aws-region>"               # TODO: Replace with your AWS region (e.g., us-east-1)
-    dynamodb_table = "<your-lock-table>"               # TODO: (Optional) Replace with your DynamoDB table for state locking
+    region         = "us-west-2"
+    dynamodb_table = "terraform-lock-table"
     encrypt        = true
   }
 }

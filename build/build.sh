@@ -6,7 +6,7 @@ if [ -z "$ECR_URL" ]; then
   exit 1
 fi
 
-eval $(aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin "$ECR_URL")
+eval $(aws ecr get-login-password --region us-west-2 | docker login --username AWS --password-stdin "$ECR_URL")
 docker build -t fastapi-app ..
 docker tag fastapi-app:latest "$ECR_URL":latest
 docker push "$ECR_URL":latest

@@ -1,6 +1,6 @@
 variable "aws_region" {
   description = "AWS region to deploy resources in."
-  default     = "us-east-1"
+  default     = "us-west-2"
 }
 
 variable "db_username" {

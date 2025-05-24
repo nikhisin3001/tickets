@@ -2,6 +2,11 @@ resource "aws_ecs_cluster" "main" {
   name = "fastapi-cluster"
 }
 
+resource "aws_cloudwatch_log_group" "ecs_fastapi" {
+  name              = "/ecs/fastapi"
+  retention_in_days = 7
+}
+
 resource "aws_ecs_task_definition" "fastapi" {
   family                   = "fastapi-task"
   network_mode             = "awsvpc"
@@ -16,6 +21,14 @@ resource "aws_ecs_task_definition" "fastapi" {
       essential = true
       portMappings = [{ containerPort = 8000, hostPort = 8000 }]
       environment = []
+      logConfiguration = {
+        logDriver = "awslogs"
+        options = {
+          awslogs-group         = aws_cloudwatch_log_group.ecs_fastapi.name
+          awslogs-region        = var.aws_region
+          awslogs-stream-prefix = "ecs"
+        }
+      }
     }
   ])
 }

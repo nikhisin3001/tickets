@@ -8,6 +8,7 @@ from app.daoLayer.dataModel.ticketDO import Ticket
 from app.daoLayer.database_base import Base
 from app.daoLayer.mapper.ticketMapper import ticketMapper
 from app.daoLayer.serviceObjects import TicketSO
+# from app.cacheRedis import get_from_cache, set_to_cache, invalidate_cache
 
 
 def buildLocalDB():
@@ -51,6 +52,10 @@ def create_ticket_dao(ticketSO: TicketSO):
         db.add(db_ticket)
         db.commit()
         db.refresh(db_ticket)
+
+        # Add new ticket to cache
+        # set_to_cache(ticketSO.id, ticketSO)
+
         return db_ticket
     except Exception as e:
         db.rollback()
@@ -74,10 +79,16 @@ def list_ticket_dao():
 
 def get_ticket_dao(ticket_id: str):
     db = SessionLocal()
+    # Check this in cache
+    # cached = get_from_cache(ticket_id)
+    # if cached:
+    #     return cached
     try:
         # Query ticket_id record from the tickets table
         getTicketSO = db.query(Ticket).get(ticket_id)
 
+        # Add this to cache
+        # set_to_cache(ticket_id, getTicketSO)
         return getTicketSO
 
     finally:
@@ -97,10 +108,15 @@ def update_ticket_dao(ticket_id: str, updatedTicket: TicketUpdate):
             setattr(db_ticket, key, value)
         db.commit()
         db.refresh(db_ticket)
+
+        # Invalidate your existing cache record and update
+        # with the latest ticket details
+        # invalidate_cache(ticket_id)
+        # set_to_cache(ticket_id, db_ticket)
+
     finally:
         # Close the session
         db.close()
-
 
 def delete_ticket_dao(ticket_id: str):
     db = SessionLocal()

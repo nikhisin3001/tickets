@@ -1,6 +1,8 @@
 import uuid
 
 from sqlalchemy import Column, String, Text, DateTime, func, UUID, Integer
+from sqlalchemy.sql.schema import ForeignKey
+
 from app.daoLayer.database_base import Base
 
 
@@ -15,3 +17,5 @@ class Ticket(Base):
     severity = Column(String(50), nullable=False)
     status = Column(String(50), default='open')
     comments = Column(String(255), nullable=True)
+    category = Column(String(50))
+    assignee = Column(String(255))

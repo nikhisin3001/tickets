@@ -10,10 +10,9 @@ variable "db_username" {
 }
 
 variable "db_password" {
-  description = "Database master password."
+  description = "Database master password. (stored in Secrets Manager)"
   type        = string
   sensitive   = true
-  default     = "nikhilticket"
 }
 
 variable "db_name" {

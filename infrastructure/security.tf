@@ -47,7 +47,7 @@ resource "aws_security_group" "lb_sg" {
     from_port   = 8000
     to_port     = 8000
     protocol    = "tcp"
-    cidr_blocks = ["67.169.76.0/24"] # Replace with your trusted IP range(s)
+    cidr_blocks = ["67.169.76.0/24", "99.113.39.117/32"] # Added new trusted IP
   }
 
   egress {

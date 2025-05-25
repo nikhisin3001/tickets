@@ -17,7 +17,7 @@ resource "aws_iam_role_policy_attachment" "ecs_task_execution_policy" {
 
 # Allow ECS task execution role to get secret value from Secrets Manager
 resource "aws_iam_policy" "ecs_secretsmanager_policy" {
-  name        = "ecsSecretsManagerPolicy"
+  name        = "ecsSecretsManagerPolicy2" # Changed name to avoid conflict
   description = "Allow ECS tasks to get secret value from Secrets Manager"
   policy      = jsonencode({
     Version = "2012-10-17",

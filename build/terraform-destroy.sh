@@ -1,3 +1,3 @@
 #!/bin/bash
-cd ../infrastructure || exit 1
+cd "$(dirname "$0")/../infrastructure" || exit 1
 terraform apply --destroy

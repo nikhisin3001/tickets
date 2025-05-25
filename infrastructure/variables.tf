@@ -19,3 +19,13 @@ variable "db_name" {
   description = "Database name."
   default     = "ticket-service"
 }
+
+variable "alb_domain_name" {
+  description = "The domain name for the ALB ACM certificate."
+  type        = string
+}
+
+variable "route53_zone_id" {
+  description = "The Route53 Hosted Zone ID for ACM DNS validation."
+  type        = string
+}

@@ -25,13 +25,52 @@ resource "aws_lb_target_group" "ui_tg" {
   }
 }
 
-resource "aws_lb_listener" "http" {
+# ACM certificate for ALB (replace domain_name and validation as needed)
+resource "aws_acm_certificate" "alb_cert" {
+  domain_name       = var.alb_domain_name
+  validation_method = "DNS"
+}
+
+resource "aws_acm_certificate_validation" "alb_cert_validation" {
+  certificate_arn         = aws_acm_certificate.alb_cert.arn
+  validation_record_fqdns = [for record in aws_route53_record.alb_cert_validation : record.fqdn]
+}
+
+# ACM certificate DNS validation records (example, update zone_id as needed)
+resource "aws_route53_record" "alb_cert_validation" {
+  count   = length(aws_acm_certificate.alb_cert.domain_validation_options)
+  zone_id = var.route53_zone_id
+  name    = aws_acm_certificate.alb_cert.domain_validation_options[count.index].resource_record_name
+  type    = aws_acm_certificate.alb_cert.domain_validation_options[count.index].resource_record_type
+  records = [aws_acm_certificate.alb_cert.domain_validation_options[count.index].resource_record_value]
+  ttl     = 60
+}
+
+# HTTPS listener for ALB
+resource "aws_lb_listener" "https" {
   load_balancer_arn = aws_lb.app_lb.arn
-  port              = 8000
-  protocol          = "HTTP"
+  port              = 443
+  protocol          = "HTTPS"
+  ssl_policy        = "ELBSecurityPolicy-2016-08"
+  certificate_arn   = aws_acm_certificate.alb_cert.arn
 
   default_action {
     type             = "forward"
     target_group_arn = aws_lb_target_group.ui_tg.arn
+  }
+}
+
+# Redirect HTTP to HTTPS
+resource "aws_lb_listener" "http" {
+  load_balancer_arn = aws_lb.app_lb.arn
+  port              = 8000
+  protocol          = "HTTP"
+  default_action {
+    type = "redirect"
+    redirect {
+      port        = "443"
+      protocol    = "HTTPS"
+      status_code = "HTTP_301"
+    }
   }
 }
